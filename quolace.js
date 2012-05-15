@@ -35,6 +35,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 function Quolace(appId) {
     var $ = jQuery,
         urlRoot = "https://quolace.appspot.com/",
+        maxKeyLength = 500,
+        maxValueLength = 10000,
         tokenStorageKey = "quolace_token_" + appId,
         initialUrlStorageKey = "quolace_initial_url" + appId,
         token = localStorage.getItem(tokenStorageKey);
@@ -101,17 +103,25 @@ function Quolace(appId) {
     
     function set(key, value, fn) {
         if(typeof(key) === "string") {
-            var url = buildUrl(appId, key, token);
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: {"value": value || ""},
-                success: function(data) {
-                    if(fn) { fn(data.success); }
-                },
-                dataType: "json",
-                error: getErrorHandler(fn)
-            });
+            if(key.length > maxKeyLength) {
+                if(fn) { fn(false); }
+                console.error("Key is " + key.length + " characters long, the maximum key length is " + maxKeyLength + " - ", key);
+            } else if (value.length > maxValueLength) {
+                if(fn) { fn(false); }
+                console.error("Value is " + value.length + " characters long, the maximum value length is " + maxValueLength + " - ", value);
+            } else {
+                var url = buildUrl(appId, key, token);
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: {"value": value || ""},
+                    success: function(data) {
+                        if(fn) { fn(data.success); }
+                    },
+                    dataType: "json",
+                    error: getErrorHandler(fn)
+                });
+            }
         } else {
             if(fn) { fn(false); }
             console.error("Key is not a string - ", key);
