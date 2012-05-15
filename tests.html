@@ -239,14 +239,14 @@
         }
 
         function standardInit(testFn, callback, options) {
-            var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+            var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff", options);
             q.init(function(success) {
                 if(success || q.isUsingLocalStorage()) {
                     testFn(q, callback);
                 } else {
                     callback(false, "Init failed");
                 }
-            }, options);
+            });
         }
 
         function performTest(i, useLS) {
