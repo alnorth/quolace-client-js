@@ -56,175 +56,195 @@
     <script src="http://software.alnorth.com/bootstrap2/js/bootstrap.min.js"></script>
     <script src="quolace.js"></script>
     <script type="text/javascript">
-        var tests = [
-            {
-                name: "init",
-                test: function(callback) {
-                    var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
-                    q.init(function(success) {
-                        callback(success);
-                    });
+        var randomStringLength = 80,
+            tests = [
+                {
+                    name: "init",
+                    test: function(callback) {
+                        var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+                        q.init(function(success) {
+                            callback(success);
+                        });
+                    }
+                },
+                {
+                    name: "init with stored token",
+                    test: function(callback) {
+                        var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+                        q.init(function(success) {
+                           callback(success); 
+                        });
+                    }
+                },
+                {
+                    name: "Simple get and set",
+                    test: function(callback) {
+                        var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+                        q.init(function(success) {
+                            var key = randomString(randomStringLength),
+                                value = randomString(randomStringLength);
+                            if(success) {
+                                q.set(key, value, function(success) {
+                                    if(success) {
+                                        q.get(key, function(success, data) {
+                                            if(success) {
+                                                callback(data === value, "Data was not equal");
+                                            } else {
+                                                callback(false, "Get operation failed");
+                                            }
+                                        });
+                                    } else {
+                                        callback(false, "Set operation failed");
+                                    }
+                                });
+                            }
+                        });
+                    }
+                },
+                {
+                    name: "Setting a null gets a null",
+                    test: function(callback) {
+                        var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+                        q.init(function(success) {
+                            var key = randomString(randomStringLength),
+                                value = null;
+                            if(success) {
+                                q.set(key, value, function(success) {
+                                    if(success) {
+                                        q.get(key, function(success, data) {
+                                            if(success) {
+                                                callback(data === value, "Value returned was not null");
+                                            } else {
+                                                callback(false, "Get operation failed");
+                                            }
+                                        });
+                                    } else {
+                                        callback(false, "Set operation failed");
+                                    }
+                                });
+                            }
+                        });
+                    }
+                },
+                {
+                    name: "Setting an empty string gets a null",
+                    test: function(callback) {
+                        var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+                        q.init(function(success) {
+                            var key = randomString(randomStringLength),
+                                value = "";
+                            if(success) {
+                                q.set(key, value, function(success) {
+                                    if(success) {
+                                        q.get(key, function(success, data) {
+                                            if(success) {
+                                                callback(data === null, "Value returned was not null");
+                                            } else {
+                                                callback(false, "Get operation failed");
+                                            }
+                                        });
+                                    } else {
+                                        callback(false, "Set operation failed");
+                                    }
+                                });
+                            }
+                        });
+                    }
+                },
+                {
+                    name: "Set fails when using an object as a key",
+                    test: function(callback) {
+                        var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+                        q.init(function(success) {
+                            var key = {"whatever": "whatever"},
+                                value = randomString(randomStringLength);
+                            if(success) {
+                                q.set(key, value, function(success) {
+                                    callback(!success, "Set operation with object key succeded");
+                                });
+                            }
+                        });
+                    }
+                },
+                {
+                    name: "Set fails when using an object as a value",
+                    test: function(callback) {
+                        var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+                        q.init(function(success) {
+                            var key = randomString(randomStringLength),
+                                value = {"whatever": "whatever"};
+                            if(success) {
+                                q.set(key, value, function(success) {
+                                    callback(!success, "Set operation with object value succeded");
+                                });
+                            }
+                        });
+                    }
+                },
+                {
+                    name: "Get fails when using an object as a key",
+                    test: function(callback) {
+                        var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+                        q.init(function(success) {
+                            var key = {"whatever": "whatever"};
+                            if(success) {
+                                q.get(key, function(success) {
+                                    callback(!success, "Get operation with object key succeded");
+                                });
+                            }
+                        });
+                    }
+                },
+                {
+                    name: "Set fails when key is too long",
+                    test: function(callback) {
+                        var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+                        q.init(function(success) {
+                            var key = randomString(501),
+                                value = randomString(randomStringLength);
+                            if(success) {
+                                q.set(key, value, function(success) {
+                                    callback(!success, "Set operation with too long key succeded");
+                                });
+                            }
+                        });
+                    }
+                },
+                {
+                    name: "Set fails when value is too long",
+                    test: function(callback) {
+                        var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+                        q.init(function(success) {
+                            var key = randomString(randomStringLength),
+                                value = randomString(10001);
+                            if(success) {
+                                q.set(key, value, function(success) {
+                                    callback(!success, "Set operation with too long value succeded");
+                                });
+                            }
+                        });
+                    }
+                },
+                {
+                    name: "Getting a non-existant value returns success == true and null",
+                    test: function(callback) {
+                        var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+                        q.init(function(success) {
+                            var key = randomString(randomStringLength);
+                            if(success) {
+                                q.get(key, function(success, data) {
+                                    if(success) {
+                                        console.log(data);
+                                        callback(data === null, "Data was not null");
+                                    } else {
+                                        callback(false, "Success = false");
+                                    }
+                                });
+                            }
+                        });
+                    }
                 }
-            },
-            {
-                name: "init with stored token",
-                test: function(callback) {
-                    var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
-                    q.init(function(success) {
-                       callback(success); 
-                    });
-                }
-            },
-            {
-                name: "Simple get and set",
-                test: function(callback) {
-                    var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
-                    q.init(function(success) {
-                        var key = randomString(40),
-                            value = randomString(40);
-                        if(success) {
-                            q.set(key, value, function(success) {
-                                if(success) {
-                                    q.get(key, function(success, data) {
-                                        if(success) {
-                                            callback(data === value, "Data was not equal");
-                                        } else {
-                                            callback(false, "Get operation failed");
-                                        }
-                                    });
-                                } else {
-                                    callback(false, "Set operation failed");
-                                }
-                            })
-                        }
-                    });
-                }
-            },
-            {
-                name: "Setting a null gets a null",
-                test: function(callback) {
-                    var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
-                    q.init(function(success) {
-                        var key = randomString(40),
-                            value = null;
-                        if(success) {
-                            q.set(key, value, function(success) {
-                                if(success) {
-                                    q.get(key, function(success, data) {
-                                        if(success) {
-                                            callback(data === value, "Value returned was not null");
-                                        } else {
-                                            callback(false, "Get operation failed");
-                                        }
-                                    });
-                                } else {
-                                    callback(false, "Set operation failed");
-                                }
-                            })
-                        }
-                    });
-                }
-            },
-            {
-                name: "Setting an empty string gets a null",
-                test: function(callback) {
-                    var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
-                    q.init(function(success) {
-                        var key = randomString(40),
-                            value = "";
-                        if(success) {
-                            q.set(key, value, function(success) {
-                                if(success) {
-                                    q.get(key, function(success, data) {
-                                        if(success) {
-                                            callback(data === null, "Value returned was not null");
-                                        } else {
-                                            callback(false, "Get operation failed");
-                                        }
-                                    });
-                                } else {
-                                    callback(false, "Set operation failed");
-                                }
-                            })
-                        }
-                    });
-                }
-            },
-            {
-                name: "Set fails when using an object as a key",
-                test: function(callback) {
-                    var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
-                    q.init(function(success) {
-                        var key = {"whatever": "whatever"},
-                            value = randomString(40);
-                        if(success) {
-                            q.set(key, value, function(success) {
-                                callback(!success, "Set operation with object key succeded");
-                            })
-                        }
-                    });
-                }
-            },
-            {
-                name: "Set fails when using an object as a value",
-                test: function(callback) {
-                    var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
-                    q.init(function(success) {
-                        var key = randomString(40),
-                            value = {"whatever": "whatever"};
-                        if(success) {
-                            q.set(key, value, function(success) {
-                                callback(!success, "Set operation with object value succeded");
-                            })
-                        }
-                    });
-                }
-            },
-            {
-                name: "Get fails when using an object as a key",
-                test: function(callback) {
-                    var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
-                    q.init(function(success) {
-                        var key = {"whatever": "whatever"};
-                        if(success) {
-                            q.get(key, function(success) {
-                                callback(!success, "Get operation with object key succeded");
-                            })
-                        }
-                    });
-                }
-            },
-            {
-                name: "Set fails when key is too long",
-                test: function(callback) {
-                    var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
-                    q.init(function(success) {
-                        var key = randomString(501),
-                            value = randomString(40);
-                        if(success) {
-                            q.set(key, value, function(success) {
-                                callback(!success, "Set operation with too long key succeded");
-                            })
-                        }
-                    });
-                }
-            },
-            {
-                name: "Set fails when value is too long",
-                test: function(callback) {
-                    var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
-                    q.init(function(success) {
-                        var key = randomString(40),
-                            value = randomString(10001);
-                        if(success) {
-                            q.set(key, value, function(success) {
-                                callback(!success, "Set operation with too long value succeded");
-                            })
-                        }
-                    });
-                }
-            }
-        ];
+            ];
 
         function randomString(string_length) {
             var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
