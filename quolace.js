@@ -100,17 +100,22 @@ function Quolace(appId) {
 	this.init = init;
 	
 	function set(key, value, fn) {
-		var url = buildUrl(appId, key, token);
-		$.ajax({
-			type: "POST",
-			url: url,
-			data: {"key": key, "value": value || ""},
-			success: function(data) {
-				if(fn) { fn(data.success); }
-			},
-			dataType: "json",
-			error: getErrorHandler(fn)
-		});
+		if(typeof(key) === "string") {
+			var url = buildUrl(appId, key, token);
+			$.ajax({
+				type: "POST",
+				url: url,
+				data: {"key": key, "value": value || ""},
+				success: function(data) {
+					if(fn) { fn(data.success); }
+				},
+				dataType: "json",
+				error: getErrorHandler(fn)
+			});
+		} else {
+			if(fn) { fn(false); }
+			console.error("Key is not a string - ", key);
+		}
 	}
 	this.set = set;
 
@@ -124,16 +129,36 @@ function Quolace(appId) {
 		if(typeof(keyOrKeys) === "string") {
 			url = buildUrl(appId, keyOrKeys, token);
 		} else {
-			url = buildUrl(appId, null, token) + "&" + $.param({"keys": JSON.stringify(keyOrKeys)});
+			//	Check that this is a valid array of strings
+			var isArray = true,
+				i = 0;
+			if(Object.prototype.toString.call(keyOrKeys) === "[object Array]") {
+				for(; i < keyOrKeys.length; i++) {
+					if(typeof(keyOrKeys[i]) !== "string") {
+						isArray = false;
+					}
+				}
+			} else {
+				isArray = false;
+			}
+			if(isArray) {
+				url = buildUrl(appId, null, token) + "&" + $.param({"keys": JSON.stringify(keyOrKeys)});
+			} else {
+				console.error("Key is not a string or array of strings - ", keyOrKeys);
+			}
 		}
-		$.ajax({
-			url: url,
-			dataType: "json",
-			success: function(data) {
-				if(fn) { fn(data.success, data.data); }
-			},
-			error: getErrorHandler(fn)
-		});
+		if(url !== "") {
+			$.ajax({
+				url: url,
+				dataType: "json",
+				success: function(data) {
+					if(fn) { fn(data.success, data.data); }
+				},
+				error: getErrorHandler(fn)
+			});
+		} else {
+			if(fn) { fn(false); }
+		}
 	}
 	this.get = get;
 
