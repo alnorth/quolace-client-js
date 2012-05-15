@@ -32,14 +32,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /*jslint browser: true, sloppy: true, white: true, maxerr: 50, indent: 4 */
 
-function Quolace(appId) {
+function Quolace(appId, options) {
     var $ = jQuery,
         urlRoot = "https://quolace.appspot.com/",
         maxKeyLength = 500,
         maxValueLength = 10000,
         tokenStorageKey = "quolace_token_" + appId,
-        initialUrlStorageKey = "quolace_initial_url" + appId,
+        initialUrlStorageKey = "quolace_initial_url_" + appId,
+        userDeclinedStorageKey = "quolace_declined_" + appId,
         token = localStorage.getItem(tokenStorageKey);
+
+    options = options || {};
+    var useLocalStorage = options.alwaysUseLocalStorage || localStorage.getItem(userDeclinedStorageKey) == "true";
     
     function redirectToLogin() {
         localStorage.setItem(initialUrlStorageKey, document.location.href);
@@ -65,9 +69,21 @@ function Quolace(appId) {
         }
         return url + "?" + $.param({"token": token});
     }
+
+    function resetUrl() {
+        history.replaceState({}, "", localStorage.getItem(initialUrlStorageKey));
+        localStorage.removeItem(initialUrlStorageKey);
+    }
     
     function init(fn) {
-        if(getParameterByName("success") === "false") {
+        if(useLocalStorage) {
+            // No need to go to the API if we know we'll be using localStorage.
+            if(fn) { fn(false); }
+        } else if(getParameterByName("success") === "false") {
+            console.log("User declined link, falling back to localStorage");
+            useLocalStorage = true;
+            localStorage.setItem(userDeclinedStorageKey, "true");
+            resetUrl();
             if(fn) { fn(false); }
         } else {
             if(getParameterByName("success") === "true") {
@@ -81,10 +97,12 @@ function Quolace(appId) {
                         if(data.success) {
                             token = data.token;
                             localStorage.setItem(tokenStorageKey, token);
-                            history.replaceState({}, "", localStorage.getItem(initialUrlStorageKey));
-                            localStorage.removeItem(initialUrlStorageKey);
+                            resetUrl();
                             fn(true);
                         } else {
+                            if(data.message) {
+                                console.error("Error in API request - " + data.message);
+                            }
                             if(fn) { fn(false); }
                         }
                     },
@@ -116,20 +134,29 @@ function Quolace(appId) {
                 if(fn) { fn(false); }
                 console.error("Value is " + value.length + " characters long, the maximum value length is " + maxValueLength + " - ", value);
             } else {
-                var url = buildUrl(appId, key, token);
-                $.ajax({
-                    type: "POST",
-                    url: url,
-                    data: {"value": value || ""},
-                    success: function(data) {
-                        if(!data.success && data.message) {
-                            console.error("Error in API request - " + data.message);
-                        }
-                        if(fn) { fn(data.success); }
-                    },
-                    dataType: "json",
-                    error: getErrorHandler(fn)
-                });
+                if(useLocalStorage) {
+                    if(value && value !== "") {
+                        localStorage.setItem(key, value);
+                    } else {
+                        localStorage.removeItem(key, value);
+                    }
+                    if(fn) { fn(true); }
+                } else {
+                    var url = buildUrl(appId, key, token);
+                    $.ajax({
+                        type: "POST",
+                        url: url,
+                        data: {"value": value || ""},
+                        success: function(data) {
+                            if(!data.success && data.message) {
+                                console.error("Error in API request - " + data.message);
+                            }
+                            if(fn) { fn(data.success); }
+                        },
+                        dataType: "json",
+                        error: getErrorHandler(fn)
+                    });
+                }
             }
         }
     }
@@ -139,7 +166,7 @@ function Quolace(appId) {
         this.set(key, value === null ? "" : JSON.stringify(value), fn);
     }
     this.setObject = setObject;
-    
+
     function get(keyOrKeys, fn) {
         var url = "";
         if(typeof(keyOrKeys) === "string") {
@@ -164,17 +191,21 @@ function Quolace(appId) {
             }
         }
         if(url !== "") {
-            $.ajax({
-                url: url,
-                dataType: "json",
-                success: function(data) {
-                    if(!data.success && data.message) {
-                        console.error("Error in API request - " + data.message);
-                    }
-                    if(fn) { fn(data.success, data.data); }
-                },
-                error: getErrorHandler(fn)
-            });
+            if(useLocalStorage) {
+                if(fn) { fn(true, localStorage.getItem(keyOrKeys)); }
+            } else {
+                $.ajax({
+                    url: url,
+                    dataType: "json",
+                    success: function(data) {
+                        if(!data.success && data.message) {
+                            console.error("Error in API request - " + data.message);
+                        }
+                        if(fn) { fn(data.success, data.data); }
+                    },
+                    error: getErrorHandler(fn)
+                });
+            }
         } else {
             if(fn) { fn(false); }
         }
@@ -203,4 +234,15 @@ function Quolace(appId) {
         });
     }
     this.getObject = getObject;
+
+    function isUsingLocalStorage() {
+        return useLocalStorage;
+    }
+    this.isUsingLocalStorage = isUsingLocalStorage;
+
+    function login() {
+        localStorage.removeItem(userDeclinedStorageKey);
+        redirectToLogin();
+    }
+    this.login = login;
 }

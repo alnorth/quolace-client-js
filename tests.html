@@ -63,7 +63,7 @@
                     test: function(callback) {
                         var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
                         q.init(function(success) {
-                            callback(success);
+                            callback(success || q.isUsingLocalStorage());
                         });
                     }
                 },
@@ -72,7 +72,7 @@
                     test: function(callback) {
                         var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
                         q.init(function(success) {
-                           callback(success); 
+                           callback(success || q.isUsingLocalStorage()); 
                         });
                     }
                 },
@@ -83,7 +83,7 @@
                         q.init(function(success) {
                             var key = randomString(randomStringLength),
                                 value = randomString(randomStringLength);
-                            if(success) {
+                            if(success || q.isUsingLocalStorage()) {
                                 q.set(key, value, function(success) {
                                     if(success) {
                                         q.get(key, function(success, data) {
@@ -108,7 +108,7 @@
                         q.init(function(success) {
                             var key = randomString(randomStringLength),
                                 value = null;
-                            if(success) {
+                            if(success || q.isUsingLocalStorage()) {
                                 q.set(key, value, function(success) {
                                     if(success) {
                                         q.get(key, function(success, data) {
@@ -133,7 +133,7 @@
                         q.init(function(success) {
                             var key = randomString(randomStringLength),
                                 value = "";
-                            if(success) {
+                            if(success || q.isUsingLocalStorage()) {
                                 q.set(key, value, function(success) {
                                     if(success) {
                                         q.get(key, function(success, data) {
@@ -158,7 +158,7 @@
                         q.init(function(success) {
                             var key = {"whatever": "whatever"},
                                 value = randomString(randomStringLength);
-                            if(success) {
+                            if(success || q.isUsingLocalStorage()) {
                                 q.set(key, value, function(success) {
                                     callback(!success, "Set operation with object key succeded");
                                 });
@@ -173,7 +173,7 @@
                         q.init(function(success) {
                             var key = randomString(randomStringLength),
                                 value = {"whatever": "whatever"};
-                            if(success) {
+                            if(success || q.isUsingLocalStorage()) {
                                 q.set(key, value, function(success) {
                                     callback(!success, "Set operation with object value succeded");
                                 });
@@ -187,7 +187,7 @@
                         var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
                         q.init(function(success) {
                             var key = {"whatever": "whatever"};
-                            if(success) {
+                            if(success || q.isUsingLocalStorage()) {
                                 q.get(key, function(success) {
                                     callback(!success, "Get operation with object key succeded");
                                 });
@@ -202,7 +202,7 @@
                         q.init(function(success) {
                             var key = randomString(501),
                                 value = randomString(randomStringLength);
-                            if(success) {
+                            if(success || q.isUsingLocalStorage()) {
                                 q.set(key, value, function(success) {
                                     callback(!success, "Set operation with too long key succeded");
                                 });
@@ -217,7 +217,7 @@
                         q.init(function(success) {
                             var key = randomString(randomStringLength),
                                 value = randomString(10001);
-                            if(success) {
+                            if(success || q.isUsingLocalStorage()) {
                                 q.set(key, value, function(success) {
                                     callback(!success, "Set operation with too long value succeded");
                                 });
@@ -231,10 +231,9 @@
                         var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
                         q.init(function(success) {
                             var key = randomString(randomStringLength);
-                            if(success) {
+                            if(success || q.isUsingLocalStorage()) {
                                 q.get(key, function(success, data) {
                                     if(success) {
-                                        console.log(data);
                                         callback(data === null, "Data was not null");
                                     } else {
                                         callback(false, "Success = false");
