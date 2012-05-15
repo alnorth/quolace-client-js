@@ -227,13 +227,18 @@
 
         function setupDisplay() {
             $(tests).each(function(index) {
-                var resultDisplay = $("<div></div>", {"class": "alert"}).text(this.name);
+                var resultDisplay = $("<div></div>", {"class": "alert"}).text("Web - " + this.name);
                 $("#results").append(resultDisplay);
                 this.display = resultDisplay;
             });
+            $(tests).each(function(index) {
+                var resultDisplay = $("<div></div>", {"class": "alert"}).text("LS - " + this.name);
+                $("#results").append(resultDisplay);
+                this.lsDisplay = resultDisplay;
+            });
         }
 
-        function standardInit(testFn, callback) {
+        function standardInit(testFn, callback, options) {
             var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
             q.init(function(success) {
                 if(success || q.isUsingLocalStorage()) {
@@ -241,35 +246,42 @@
                 } else {
                     callback(false, "Init failed");
                 }
-            });
+            }, options);
         }
 
-        function performTest(i) {
+        function performTest(i, useLS) {
             var test = tests[i];
+            var display = useLS ? test.lsDisplay : test.display;
             var callback = function(success, message) {
                 if(success) {
-                    test.display.addClass("alert-success")
+                    display.addClass("alert-success")
                         .fadeTo(500, 0).slideUp(500);
                 } else {
-                    test.display.addClass("alert-error");
+                    display.addClass("alert-error");
                     if(message) {
-                        test.display.append($("<div></div>", {"class": "small"}).text(message));
+                        display.append($("<div></div>", {"class": "small"}).text(message));
                     }
                 }
                 if(tests[i + 1]) {
-                    setTimeout(function() {performTest(i + 1);}, 100);
+                    setTimeout(function() {performTest(i + 1, useLS);}, 100);
+                } else if(!useLS) {
+                    setTimeout(function() {performTest(0, true);}, 100);
                 } else {
                     // We're done, clear up our mess.
                     clearLocalStorage();
                 }
             };
-            standardInit(test.test, callback);
+            var options;
+            if(useLS) {
+                options = {alwaysUseLocalStorage: true};
+            }
+            standardInit(test.test, callback, options);
         }
 
         $(function() {
             setupDisplay();
 
-            performTest(0);
+            performTest(0, false);
         });
     </script>
 
