@@ -46,8 +46,8 @@ function Quolace(appId) {
 	
 	// From http://stackoverflow.com/a/5158301/152347
 	function getParameterByName(name) {
-		var match = new RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
-		return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+		var match = new RegExp("[?&]" + name + "=([^&]*)").exec(window.location.search);
+		return match && decodeURIComponent(match[1].replace(/\+/g, " "));
 	}
 
 	function getErrorHandler(fn) {
@@ -79,7 +79,9 @@ function Quolace(appId) {
 						if(data.success) {
 							token = data.token;
 							localStorage.setItem(tokenStorageKey, token);
-							document.location = localStorage.getItem(initialUrlStorageKey);
+							history.replaceState({}, "", localStorage.getItem(initialUrlStorageKey));
+							localStorage.removeItem(initialUrlStorageKey);
+							fn(true);
 						} else {
 							if(fn) { fn(false); }
 						}
