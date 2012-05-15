@@ -92,6 +92,58 @@
                     }
                 },
                 {
+                    name: "Set and multivalue get",
+                    test: function(q, callback) {
+                        var key1 = randomString(randomStringLength),
+                            value1 = randomString(randomStringLength),
+                            key2 = randomString(randomStringLength),
+                            value2 = randomString(randomStringLength),
+                            key3 = randomString(randomStringLength),
+                            value3 = randomString(randomStringLength),
+                            key4 = randomString(randomStringLength);
+
+                        var getAndCompare = function() {
+                            q.get([key1, key2, key3, key4], function(success, data) {
+                                if(success) {
+                                    if(data[key1] !== value1) {
+                                        callback(false, "Value 1 wrong");
+                                    } else if(data[key2] !== value2) {
+                                        callback(false, "Value 2 wrong");
+                                    } else if(data[key3] !== value3) {
+                                        callback(false, "Value 3 wrong");
+                                    } else if(data[key4] !== null) {
+                                        callback(false, "Value 4 wrong - not null");
+                                    } else {
+                                        callback(true);
+                                    }
+                                } else {
+                                    callback(false, "Get operation 3 failed");
+                                }
+                            });
+                        };
+
+                        q.set(key1, value1, function(success) {
+                            if(success) {
+                                q.set(key2, value2, function(success) {
+                                    if(success) {
+                                        q.set(key3, value3, function(success) {
+                                            if(success) {
+                                                getAndCompare();
+                                            } else {
+                                                callback(false, "Set operation 3 failed");
+                                            }
+                                        });
+                                    } else {
+                                        callback(false, "Set operation 2 failed");
+                                    }
+                                });
+                            } else {
+                                callback(false, "Set operation 1 failed");
+                            }
+                        });
+                    }
+                },
+                {
                     name: "Setting a null gets a null",
                     test: function(q, callback) {
                         var key = randomString(randomStringLength),
