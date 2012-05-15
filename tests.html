@@ -116,6 +116,21 @@
                 }
             },
             {
+                name: "Set fails when using an object as a value",
+                test: function(callback) {
+                    var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+                    q.init(function(success) {
+                        var key = randomString(40),
+                            value = {"whatever": "whatever"};
+                        if(success) {
+                            q.set(key, value, function(success) {
+                                callback(!success, "Set operation with object value succeded");
+                            })
+                        }
+                    });
+                }
+            },
+            {
                 name: "Get fails when using an object as a key",
                 test: function(callback) {
                     var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");

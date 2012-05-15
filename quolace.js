@@ -102,7 +102,13 @@ function Quolace(appId) {
     this.init = init;
     
     function set(key, value, fn) {
-        if(typeof(key) === "string") {
+        if(typeof(key) !== "string") {
+            if(fn) { fn(false); }
+            console.error("Key is not a string - ", key);
+        } else if(typeof(value) !== "string") {
+            if(fn) { fn(false); }
+            console.error("Value is not a string - ", value);
+        } else {
             if(key.length > maxKeyLength) {
                 if(fn) { fn(false); }
                 console.error("Key is " + key.length + " characters long, the maximum key length is " + maxKeyLength + " - ", key);
@@ -125,9 +131,6 @@ function Quolace(appId) {
                     error: getErrorHandler(fn)
                 });
             }
-        } else {
-            if(fn) { fn(false); }
-            console.error("Key is not a string - ", key);
         }
     }
     this.set = set;
