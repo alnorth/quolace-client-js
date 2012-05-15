@@ -116,6 +116,9 @@ function Quolace(appId) {
                     url: url,
                     data: {"value": value || ""},
                     success: function(data) {
+                        if(!data.success && data.message) {
+                            console.error("Error in API request - " + data.message);
+                        }
                         if(fn) { fn(data.success); }
                     },
                     dataType: "json",
@@ -162,6 +165,9 @@ function Quolace(appId) {
                 url: url,
                 dataType: "json",
                 success: function(data) {
+                    if(!data.success && data.message) {
+                        console.error("Error in API request - " + data.message);
+                    }
                     if(fn) { fn(data.success, data.data); }
                 },
                 error: getErrorHandler(fn)
