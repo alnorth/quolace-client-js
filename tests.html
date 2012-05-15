@@ -1,0 +1,171 @@
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Quolace client tests</title>
+    <meta name="description" content="">
+
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="http://software.alnorth.com/bootstrap2/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="http://software.alnorth.com/bootstrap2/css/bootstrap-responsive.min.css">
+    <style type="text/css">
+        body {
+            position: relative;
+            padding-top: 40px;
+        }
+
+        @media (max-width: 980px) {
+            body {
+                padding-top: 0;
+            }
+        }
+
+        #results {
+            margin-top: 45px;
+        }
+
+        div.small {
+            font-size: 0.8em;
+        }
+
+        .footer {
+            margin-top: 45px;
+            padding: 35px 0 36px;
+            border-top: 1px solid #E5E5E5;
+        }
+    </style>
+</head>
+<body>
+    <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
+    <div class="container">
+        <h1>Quolace client tests</h1>
+
+        <div id="results"></div>
+
+        <footer class="footer">
+            &copy; 2012 <a href="http://www.twitter.com/alasdairnorth">@alasdairnorth</a> | <a href="http://software.alnorth.com/">other projects</a>
+        </footer>
+    </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script src="http://software.alnorth.com/bootstrap2/js/bootstrap.min.js"></script>
+    <script src="quolace.js"></script>
+    <script type="text/javascript">
+        var tests = [
+            {
+                name: "init",
+                test: function(callback) {
+                    var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+                    q.init(function(success) {
+                        callback(success);
+                    });
+                }
+            },
+            {
+                name: "init with stored token",
+                test: function(callback) {
+                    var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+                    q.init(function(success) {
+                       callback(success); 
+                    });
+                }
+            },
+            {
+                name: "Simple get and set",
+                test: function(callback) {
+                    var q = new Quolace("f3c3a1e3-9e56-11e1-9e2d-11476a4967ff");
+                    q.init(function(success) {
+                        var key = randomString(40),
+                            value = randomString(40);
+                        if(success) {
+                            q.set(key, value, function(success) {
+                                if(success) {
+                                    q.get(key, function(success, data) {
+                                        if(success) {
+                                            callback(data === value, "Data was not equal");
+                                        } else {
+                                            callback(false, "Get operation failed");
+                                        }
+                                    });
+                                } else {
+                                    callback(false, "Set operation failed");
+                                }
+                            })
+                        }
+                    });
+                }
+            }
+        ];
+
+        function randomString(string_length) {
+            var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+            var randomstring = "";
+            for (var i=0; i< string_length; i++) {
+                var rnum = Math.floor(Math.random() * chars.length);
+                randomstring += chars.substring(rnum, rnum + 1);
+            }
+            return randomstring;
+        }
+
+        function clearLocalStorage() {
+            var i = 0,
+                toRemove = [];
+            for(; i < localStorage.length; i++) {
+                toRemove.push(localStorage.key(i));
+            }
+
+            $(toRemove).each(function() {
+                localStorage.removeItem(this);
+            });
+        }
+
+        function setupDisplay() {
+            $(tests).each(function(index) {
+                var resultDisplay = $("<div></div>", {"class": "alert"}).text(this.name);
+                $("#results").append(resultDisplay);
+                this.display = resultDisplay;
+            });
+        }
+
+        function performTest(i) {
+            var test = tests[i];
+            test.test(function(success, message) {
+                if(success) {
+                    test.display.addClass("alert-success");
+                } else {
+                    test.display.addClass("alert-error");
+                    if(message) {
+                        test.display.append($("<div></div>", {"class": "small"}).text(message));
+                    }
+                }
+                if(tests[i + 1]) {
+                    setTimeout(function() {performTest(i + 1);}, 100);
+                } else {
+                    // We're done, clear up our mess.
+                    clearLocalStorage();
+                }
+            });
+        }
+
+        $(function() {
+            setupDisplay();
+
+            performTest(0);
+        });
+    </script>
+
+    <!--
+    <script>
+        var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+    </script>
+    -->
+</body>
+</html>
