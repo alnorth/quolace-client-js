@@ -33,155 +33,155 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*jslint browser: true, sloppy: true, white: true, maxerr: 50, indent: 4 */
 
 function Quolace(appId) {
-	var $ = jQuery,
-		urlRoot = "https://quolace.appspot.com/",
-		tokenStorageKey = "quolace_token_" + appId,
-		initialUrlStorageKey = "quolace_initial_url" + appId,
-		token = localStorage.getItem(tokenStorageKey);
-	
-	function redirectToLogin() {
-		localStorage.setItem(initialUrlStorageKey, document.location.href);
-		document.location = urlRoot + "app/link?" + $.param({"id": appId, "return_url": document.location.href});
-	}
-	
-	// From http://stackoverflow.com/a/5158301/152347
-	function getParameterByName(name) {
-		var match = new RegExp("[?&]" + name + "=([^&]*)").exec(window.location.search);
-		return match && decodeURIComponent(match[1].replace(/\+/g, " "));
-	}
+    var $ = jQuery,
+        urlRoot = "https://quolace.appspot.com/",
+        tokenStorageKey = "quolace_token_" + appId,
+        initialUrlStorageKey = "quolace_initial_url" + appId,
+        token = localStorage.getItem(tokenStorageKey);
+    
+    function redirectToLogin() {
+        localStorage.setItem(initialUrlStorageKey, document.location.href);
+        document.location = urlRoot + "app/link?" + $.param({"id": appId, "return_url": document.location.href});
+    }
+    
+    // From http://stackoverflow.com/a/5158301/152347
+    function getParameterByName(name) {
+        var match = new RegExp("[?&]" + name + "=([^&]*)").exec(window.location.search);
+        return match && decodeURIComponent(match[1].replace(/\+/g, " "));
+    }
 
-	function getErrorHandler(fn) {
-		return function(jqXHR, textStatus, errorThrown) {
-			if(fn) { fn(false); }
-		};
-	}
+    function getErrorHandler(fn) {
+        return function(jqXHR, textStatus, errorThrown) {
+            if(fn) { fn(false); }
+        };
+    }
 
-	function buildUrl(appId, key, token) {
-		var url = urlRoot + "api/1/apps/" + encodeURIComponent(appId) + "/values";
-		if(key) {
-			url += "/" + encodeURIComponent(key);
-		}
-		return url + "?" + $.param({"token": token});
-	}
-	
-	function init(fn) {
-		if(getParameterByName("success") === "false") {
-			if(fn) { fn(false); }
-		} else {
-			if(getParameterByName("success") === "true") {
-				var auth_grant = getParameterByName("auth_grant"),
-					upgradeUrl = urlRoot + "api/1/upgrade?callback=?&" + $.param({"id": appId, "auth_grant": auth_grant});
+    function buildUrl(appId, key, token) {
+        var url = urlRoot + "api/1/apps/" + encodeURIComponent(appId) + "/values";
+        if(key) {
+            url += "/" + encodeURIComponent(key);
+        }
+        return url + "?" + $.param({"token": token});
+    }
+    
+    function init(fn) {
+        if(getParameterByName("success") === "false") {
+            if(fn) { fn(false); }
+        } else {
+            if(getParameterByName("success") === "true") {
+                var auth_grant = getParameterByName("auth_grant"),
+                    upgradeUrl = urlRoot + "api/1/upgrade?callback=?&" + $.param({"id": appId, "auth_grant": auth_grant});
 
-				$.ajax({
-					url: upgradeUrl,
-					dataType: "json",
-					success: function(data) {
-						if(data.success) {
-							token = data.token;
-							localStorage.setItem(tokenStorageKey, token);
-							history.replaceState({}, "", localStorage.getItem(initialUrlStorageKey));
-							localStorage.removeItem(initialUrlStorageKey);
-							fn(true);
-						} else {
-							if(fn) { fn(false); }
-						}
-					},
-					error: getErrorHandler(fn)
-				});
-				
-			} else if(token) {
-				localStorage.removeItem(initialUrlStorageKey);
-				if(fn) { fn(true); }
-			} else {
-				redirectToLogin();
-			}
-		}
-	}
-	this.init = init;
-	
-	function set(key, value, fn) {
-		if(typeof(key) === "string") {
-			var url = buildUrl(appId, key, token);
-			$.ajax({
-				type: "POST",
-				url: url,
-				data: {"key": key, "value": value || ""},
-				success: function(data) {
-					if(fn) { fn(data.success); }
-				},
-				dataType: "json",
-				error: getErrorHandler(fn)
-			});
-		} else {
-			if(fn) { fn(false); }
-			console.error("Key is not a string - ", key);
-		}
-	}
-	this.set = set;
+                $.ajax({
+                    url: upgradeUrl,
+                    dataType: "json",
+                    success: function(data) {
+                        if(data.success) {
+                            token = data.token;
+                            localStorage.setItem(tokenStorageKey, token);
+                            history.replaceState({}, "", localStorage.getItem(initialUrlStorageKey));
+                            localStorage.removeItem(initialUrlStorageKey);
+                            fn(true);
+                        } else {
+                            if(fn) { fn(false); }
+                        }
+                    },
+                    error: getErrorHandler(fn)
+                });
+                
+            } else if(token) {
+                localStorage.removeItem(initialUrlStorageKey);
+                if(fn) { fn(true); }
+            } else {
+                redirectToLogin();
+            }
+        }
+    }
+    this.init = init;
+    
+    function set(key, value, fn) {
+        if(typeof(key) === "string") {
+            var url = buildUrl(appId, key, token);
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: {"key": key, "value": value || ""},
+                success: function(data) {
+                    if(fn) { fn(data.success); }
+                },
+                dataType: "json",
+                error: getErrorHandler(fn)
+            });
+        } else {
+            if(fn) { fn(false); }
+            console.error("Key is not a string - ", key);
+        }
+    }
+    this.set = set;
 
-	function setObject(key, value, fn) {
-		this.set(key, value === null ? "" : JSON.stringify(value), fn);
-	}
-	this.setObject = setObject;
-	
-	function get(keyOrKeys, fn) {
-		var url = "";
-		if(typeof(keyOrKeys) === "string") {
-			url = buildUrl(appId, keyOrKeys, token);
-		} else {
-			//	Check that this is a valid array of strings
-			var isArray = true,
-				i = 0;
-			if(Object.prototype.toString.call(keyOrKeys) === "[object Array]") {
-				for(; i < keyOrKeys.length; i++) {
-					if(typeof(keyOrKeys[i]) !== "string") {
-						isArray = false;
-					}
-				}
-			} else {
-				isArray = false;
-			}
-			if(isArray) {
-				url = buildUrl(appId, null, token) + "&" + $.param({"keys": JSON.stringify(keyOrKeys)});
-			} else {
-				console.error("Key is not a string or array of strings - ", keyOrKeys);
-			}
-		}
-		if(url !== "") {
-			$.ajax({
-				url: url,
-				dataType: "json",
-				success: function(data) {
-					if(fn) { fn(data.success, data.data); }
-				},
-				error: getErrorHandler(fn)
-			});
-		} else {
-			if(fn) { fn(false); }
-		}
-	}
-	this.get = get;
+    function setObject(key, value, fn) {
+        this.set(key, value === null ? "" : JSON.stringify(value), fn);
+    }
+    this.setObject = setObject;
+    
+    function get(keyOrKeys, fn) {
+        var url = "";
+        if(typeof(keyOrKeys) === "string") {
+            url = buildUrl(appId, keyOrKeys, token);
+        } else {
+            //  Check that this is a valid array of strings
+            var isArray = true,
+                i = 0;
+            if(Object.prototype.toString.call(keyOrKeys) === "[object Array]") {
+                for(; i < keyOrKeys.length; i++) {
+                    if(typeof(keyOrKeys[i]) !== "string") {
+                        isArray = false;
+                    }
+                }
+            } else {
+                isArray = false;
+            }
+            if(isArray) {
+                url = buildUrl(appId, null, token) + "&" + $.param({"keys": JSON.stringify(keyOrKeys)});
+            } else {
+                console.error("Key is not a string or array of strings - ", keyOrKeys);
+            }
+        }
+        if(url !== "") {
+            $.ajax({
+                url: url,
+                dataType: "json",
+                success: function(data) {
+                    if(fn) { fn(data.success, data.data); }
+                },
+                error: getErrorHandler(fn)
+            });
+        } else {
+            if(fn) { fn(false); }
+        }
+    }
+    this.get = get;
 
-	function getObject(keyOrKeys, fn) {
-		this.get(keyOrKeys, function(success, data) {
-			var key;
-			if(fn) {
-				if(success && data) {
-					if(typeof(data) === "string") {
-						fn(success, JSON.parse(data));
-					} else {
-						for(key in data) {
-							if(data.hasOwnProperty(key) && data[key] !== null) {
-								data[key] = JSON.parse(data[key]);
-							}
-						}
-						fn(success, data);
-					}
-				} else {
-					fn(success, data);
-				}
-			}
-		});
-	}
-	this.getObject = getObject;
+    function getObject(keyOrKeys, fn) {
+        this.get(keyOrKeys, function(success, data) {
+            var key;
+            if(fn) {
+                if(success && data) {
+                    if(typeof(data) === "string") {
+                        fn(success, JSON.parse(data));
+                    } else {
+                        for(key in data) {
+                            if(data.hasOwnProperty(key) && data[key] !== null) {
+                                data[key] = JSON.parse(data[key]);
+                            }
+                        }
+                        fn(success, data);
+                    }
+                } else {
+                    fn(success, data);
+                }
+            }
+        });
+    }
+    this.getObject = getObject;
 }
