@@ -280,7 +280,8 @@
             var test = tests[i];
             test.test(function(success, message) {
                 if(success) {
-                    test.display.addClass("alert-success");
+                    test.display.addClass("alert-success")
+                        .fadeTo(500, 0).slideUp(500);
                 } else {
                     test.display.addClass("alert-error");
                     if(message) {
