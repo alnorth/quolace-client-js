@@ -105,14 +105,14 @@ function Quolace(appId) {
         if(typeof(key) !== "string") {
             if(fn) { fn(false); }
             console.error("Key is not a string - ", key);
-        } else if(typeof(value) !== "string") {
+        } else if(typeof(value) !== "string" && value !== null) {
             if(fn) { fn(false); }
             console.error("Value is not a string - ", value);
         } else {
             if(key.length > maxKeyLength) {
                 if(fn) { fn(false); }
                 console.error("Key is " + key.length + " characters long, the maximum key length is " + maxKeyLength + " - ", key);
-            } else if (value.length > maxValueLength) {
+            } else if (value !== null && value.length > maxValueLength) {
                 if(fn) { fn(false); }
                 console.error("Value is " + value.length + " characters long, the maximum value length is " + maxValueLength + " - ", value);
             } else {
