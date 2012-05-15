@@ -105,7 +105,7 @@ function Quolace(appId) {
             $.ajax({
                 type: "POST",
                 url: url,
-                data: {"key": key, "value": value || ""},
+                data: {"value": value || ""},
                 success: function(data) {
                     if(fn) { fn(data.success); }
                 },
