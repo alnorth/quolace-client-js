@@ -140,13 +140,13 @@ window["Quolace"] = function Quolace(appId, options) {
                     dataType: "json",
                     success: function(data) {
                         if(data.success) {
-                            token = data.token;
+                            token = data["token"];
                             localStorage.setItem(tokenStorageKey, token);
                             resetUrl();
                             fn(true);
                         } else {
-                            if(data.message) {
-                                console.error("Error in API request - " + data.message);
+                            if(data["message"]) {
+                                console.error("Error in API request - " + ["data"].message);
                             }
                             if(fn) { fn(false); }
                         }
@@ -193,10 +193,10 @@ window["Quolace"] = function Quolace(appId, options) {
                         url: url,
                         data: {"value": value || ""},
                         success: function(data) {
-                            if(!data.success && data.message) {
-                                console.error("Error in API request - " + data.message);
+                            if(!data["success"] && data["message"]) {
+                                console.error("Error in API request - " + data["message"]);
                             }
-                            if(fn) { fn(data.success); }
+                            if(fn) { fn(data["success"]); }
                         },
                         dataType: "json",
                         error: getErrorHandler(fn)
@@ -243,10 +243,10 @@ window["Quolace"] = function Quolace(appId, options) {
                     url: url,
                     dataType: "json",
                     success: function(data) {
-                        if(!data.success && data.message) {
-                            console.error("Error in API request - " + data.message);
+                        if(!data["success"] && data["message"]) {
+                            console.error("Error in API request - " + data["message"]);
                         }
-                        if(fn) { fn(data.success, data.data); }
+                        if(fn) { fn(data["success"], data["data"]); }
                     },
                     error: getErrorHandler(fn)
                 });
