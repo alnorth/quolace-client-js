@@ -215,44 +215,59 @@ window["Quolace"] = function Quolace(appId, options) {
     function get(keyOrKeys, fn) {
         var url = "";
         if(typeof(keyOrKeys) === "string") {
-            url = buildUrl(appId, keyOrKeys, token);
+            // This is a single key.
+            if(useLocalStorage) {
+                if(fn) {
+                    fn(true, localStorage.getItem(keyOrKeys));
+                }
+            } else {
+                url = buildUrl(appId, keyOrKeys, token);
+            }
         } else {
-            //  Check that this is a valid array of strings
+            // This could be an array of strings (a valid input) or something else entirely. Let's check.
             var isArray = true,
                 i = 0;
             if(Object.prototype.toString.call(keyOrKeys) === "[object Array]") {
                 for(; i < keyOrKeys.length; i++) {
                     if(typeof(keyOrKeys[i]) !== "string") {
                         isArray = false;
+                        break;
                     }
                 }
             } else {
                 isArray = false;
             }
+
             if(isArray) {
-                url = buildUrl(appId, null, token) + "&" + $.param({"keys": JSON.stringify(keyOrKeys)});
+                if(useLocalStorage) {
+                    var returnVal = {};
+                    for(i = 0; i < keyOrKeys.length; i++) {
+                        returnVal[keyOrKeys[i]] = localStorage.getItem(keyOrKeys[i]);
+                    }
+                    if(fn) {
+                        fn(true, returnVal);
+                    }
+                } else {
+                    url = buildUrl(appId, null, token) + "&" + $.param({"keys": JSON.stringify(keyOrKeys)});
+                }
             } else {
                 console.error("Key is not a string or array of strings - ", keyOrKeys);
+                if(fn) { fn(false); }
             }
         }
+
         if(url !== "") {
-            if(useLocalStorage) {
-                if(fn) { fn(true, localStorage.getItem(keyOrKeys)); }
-            } else {
-                $.ajax({
-                    url: url,
-                    dataType: "json",
-                    success: function(data) {
-                        if(!data["success"] && data["message"]) {
-                            console.error("Error in API request - " + data["message"]);
-                        }
-                        if(fn) { fn(data["success"], data["data"]); }
-                    },
-                    error: getErrorHandler(fn)
-                });
-            }
-        } else {
-            if(fn) { fn(false); }
+            $.ajax({
+                url: url,
+                dataType: "json",
+                success: function(data) {
+                    if(!data["success"] && data["message"]) {
+                        console.error("Error in API request - " + data["message"]);
+                    }
+                    if(fn) { fn(data["success"], data["data"]); }
+                },
+                error: getErrorHandler(fn)
+            });
         }
     }
     this["get"] = get;
