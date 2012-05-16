@@ -146,7 +146,7 @@ window["Quolace"] = function Quolace(appId, options) {
                             fn(true);
                         } else {
                             if(data["message"]) {
-                                console.error("Error in API request - " + ["data"].message);
+                                console.error("Error in API request - " + data["message"]);
                             }
                             if(fn) { fn(false); }
                         }
