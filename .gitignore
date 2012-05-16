@@ -1,2 +1,3 @@
 *.sublime-workspace
 build/quolace.min.js
+build/quolace.min.debug.js
