@@ -88,7 +88,7 @@ window["Quolace"] = function Quolace(appId, options) {
     /** 
      * @type {boolean}
      */
-    var useLocalStorage = options.alwaysUseLocalStorage || localStorage.getItem(userDeclinedStorageKey) == "true";
+    var useLocalStorage = options["alwaysUseLocalStorage"] || localStorage.getItem(userDeclinedStorageKey) == "true";
     
     function redirectToLogin() {
         localStorage.setItem(initialUrlStorageKey, document.location.href);
