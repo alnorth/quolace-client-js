@@ -30,7 +30,8 @@
  * 
  */
 
-/*jslint browser: true, sloppy: true, white: true, maxerr: 50, indent: 4 */
+/*jslint devel: true, browser: true, sloppy: true, white: true, maxerr: 50, indent: 4, vars: true, sub: true */
+/*global jQuery */
 
 /**
  * Constructor for the Quolace object.
@@ -88,7 +89,7 @@ window["Quolace"] = function Quolace(appId, options) {
     /** 
      * @type {boolean}
      */
-    var useLocalStorage = options["alwaysUseLocalStorage"] || localStorage.getItem(userDeclinedStorageKey) == "true";
+    var useLocalStorage = options["alwaysUseLocalStorage"] || localStorage.getItem(userDeclinedStorageKey) === "true";
     
     function redirectToLogin() {
         localStorage.setItem(initialUrlStorageKey, document.location.href);
@@ -102,9 +103,12 @@ window["Quolace"] = function Quolace(appId, options) {
     }
 
     function getErrorHandler(fn) {
+        /*jslint unparam: true*/
         return function(jqXHR, textStatus, errorThrown) {
+            console.error("Error in API call - ", textStatus, errorThrown);
             if(fn) { fn(false); }
         };
+        /*jslint unparam: false*/
     }
 
     function buildUrl(appId, key, token) {
@@ -228,7 +232,7 @@ window["Quolace"] = function Quolace(appId, options) {
             var isArray = true,
                 i = 0;
             if(Object.prototype.toString.call(keyOrKeys) === "[object Array]") {
-                for(; i < keyOrKeys.length; i++) {
+                for(i = 0; i < keyOrKeys.length; i += 1) {
                     if(typeof(keyOrKeys[i]) !== "string") {
                         isArray = false;
                         break;
@@ -241,7 +245,7 @@ window["Quolace"] = function Quolace(appId, options) {
             if(isArray) {
                 if(useLocalStorage) {
                     var returnVal = {};
-                    for(i = 0; i < keyOrKeys.length; i++) {
+                    for(i = 0; i < keyOrKeys.length; i += 1) {
                         returnVal[keyOrKeys[i]] = localStorage.getItem(keyOrKeys[i]);
                     }
                     if(fn) {
@@ -305,4 +309,4 @@ window["Quolace"] = function Quolace(appId, options) {
         redirectToLogin();
     }
     this["login"] = login;
-}
+};
