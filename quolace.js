@@ -1,48 +1,93 @@
-/*
-
-Quolace v0.1 - By Alasdair North
-http://quolace.appspot.com
-
-Copyright © 2012, Alasdair North
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of Alasdair North nor the
-      names of other contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL ALASDAIR NORTH OR OTHER CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-*/
+/**
+ * @license
+ * Quolace v0.1 - By Alasdair North
+ * http://quolace.appspot.com
+ * 
+ * Copyright © 2012, Alasdair North
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of Alasdair North nor the
+ *       names of other contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL ALASDAIR NORTH OR OTHER CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ */
 
 /*jslint browser: true, sloppy: true, white: true, maxerr: 50, indent: 4 */
 
-function Quolace(appId, options) {
-    var $ = jQuery,
-        urlRoot = "https://quolace.appspot.com/",
-        maxKeyLength = 500,
-        maxValueLength = 10000,
-        tokenStorageKey = "quolace_token_" + appId,
-        initialUrlStorageKey = "quolace_initial_url_" + appId,
-        userDeclinedStorageKey = "quolace_declined_" + appId,
-        token = localStorage.getItem(tokenStorageKey);
+/**
+ * Constructor for the Quolace object.
+ * @constructor
+ */
+window["Quolace"] = function Quolace(appId, options) {
+    var $ = jQuery;
+
+    /** 
+     * URL base for contacting the API. Should end in a forward slash.
+     * @const
+     * @type {string}
+     */
+    var urlRoot = "https://quolace.appspot.com/";
+
+    /** 
+     * Maximum length (in characters) of a key.
+     * @const
+     * @type {number}
+     */
+    var maxKeyLength = 500;
+
+    /** 
+     * Maximum length (in characters) of a value.
+     * @const
+     * @type {number}
+     */
+    var maxValueLength = 10000;
+
+    /** 
+     * @const
+     * @type {string}
+     */
+    var tokenStorageKey = "quolace_token_" + appId;
+
+    /** 
+     * @const
+     * @type {string}
+     */
+    var initialUrlStorageKey = "quolace_initial_url_" + appId;
+
+    /** 
+     * @const
+     * @type {string}
+     */
+    var userDeclinedStorageKey = "quolace_declined_" + appId;
+
+    /** 
+     * @type {string}
+     */
+    var token = localStorage.getItem(tokenStorageKey);
 
     options = options || {};
+
+    /** 
+     * @type {boolean}
+     */
     var useLocalStorage = options.alwaysUseLocalStorage || localStorage.getItem(userDeclinedStorageKey) == "true";
     
     function redirectToLogin() {
@@ -117,7 +162,7 @@ function Quolace(appId, options) {
             }
         }
     }
-    this.init = init;
+    this["init"] = init;
     
     function set(key, value, fn) {
         if(typeof(key) !== "string") {
@@ -160,12 +205,12 @@ function Quolace(appId, options) {
             }
         }
     }
-    this.set = set;
+    this["set"] = set;
 
     function setObject(key, value, fn) {
         this.set(key, value === null ? "" : JSON.stringify(value), fn);
     }
-    this.setObject = setObject;
+    this["setObject"] = setObject;
 
     function get(keyOrKeys, fn) {
         var url = "";
@@ -210,7 +255,7 @@ function Quolace(appId, options) {
             if(fn) { fn(false); }
         }
     }
-    this.get = get;
+    this["get"] = get;
 
     function getObject(keyOrKeys, fn) {
         this.get(keyOrKeys, function(success, data) {
@@ -233,16 +278,16 @@ function Quolace(appId, options) {
             }
         });
     }
-    this.getObject = getObject;
+    this["getObject"] = getObject;
 
     function isUsingLocalStorage() {
         return useLocalStorage;
     }
-    this.isUsingLocalStorage = isUsingLocalStorage;
+    this["isUsingLocalStorage"] = isUsingLocalStorage;
 
     function login() {
         localStorage.removeItem(userDeclinedStorageKey);
         redirectToLogin();
     }
-    this.login = login;
+    this["login"] = login;
 }
