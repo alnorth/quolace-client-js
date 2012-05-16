@@ -252,6 +252,202 @@
                             }
                         });
                     }
+                },
+                {
+                    name: "Simple getObject and setObject - object",
+                    test: function(q, callback) {
+                        var key = randomString(randomStringLength),
+                            value = {};
+
+                        value[randomString(randomStringLength)] = randomString(randomStringLength);
+                        
+                        q.setObject(key, value, function(success) {
+                            if(success) {
+                                q.getObject(key, function(success, data) {
+                                    if(success) {
+                                        callback(JSON.stringify(data) === JSON.stringify(value), "Data was not equal");
+                                    } else {
+                                        callback(false, "Get operation failed");
+                                    }
+                                });
+                            } else {
+                                callback(false, "Set operation failed");
+                            }
+                        });
+                    }
+                },
+                {
+                    name: "Simple getObject and setObject - array",
+                    test: function(q, callback) {
+                        var key = randomString(randomStringLength),
+                            value = [randomString(randomStringLength), randomString(randomStringLength), randomString(randomStringLength)];
+
+                        q.setObject(key, value, function(success) {
+                            if(success) {
+                                q.getObject(key, function(success, data) {
+                                    if(success) {
+                                        callback(JSON.stringify(data) === JSON.stringify(value), "Data was not equal");
+                                    } else {
+                                        callback(false, "Get operation failed");
+                                    }
+                                });
+                            } else {
+                                callback(false, "Set operation failed");
+                            }
+                        });
+                    }
+                },
+                {
+                    name: "Simple getObject and setObject - integer",
+                    test: function(q, callback) {
+                        var key = randomString(randomStringLength),
+                            value = 7565873;
+
+                        q.setObject(key, value, function(success) {
+                            if(success) {
+                                q.getObject(key, function(success, data) {
+                                    if(success) {
+                                        callback(data === value, "Data was not equal");
+                                    } else {
+                                        callback(false, "Get operation failed");
+                                    }
+                                });
+                            } else {
+                                callback(false, "Set operation failed");
+                            }
+                        });
+                    }
+                },
+                {
+                    name: "Simple getObject and setObject - floating point",
+                    test: function(q, callback) {
+                        var key = randomString(randomStringLength),
+                            value = 756.5873;
+
+                        q.setObject(key, value, function(success) {
+                            if(success) {
+                                q.getObject(key, function(success, data) {
+                                    if(success) {
+                                        callback(data === value, "Data was not equal");
+                                    } else {
+                                        callback(false, "Get operation failed");
+                                    }
+                                });
+                            } else {
+                                callback(false, "Set operation failed");
+                            }
+                        });
+                    }
+                },
+                {
+                    name: "Simple getObject and setObject - string",
+                    test: function(q, callback) {
+                        var key = randomString(randomStringLength),
+                            value = randomString(randomStringLength);
+
+                        q.setObject(key, value, function(success) {
+                            if(success) {
+                                q.getObject(key, function(success, data) {
+                                    if(success) {
+                                        callback(data === value, "Data was not equal");
+                                    } else {
+                                        callback(false, "Get operation failed");
+                                    }
+                                });
+                            } else {
+                                callback(false, "Set operation failed");
+                            }
+                        });
+                    }
+                },
+                {
+                    name: "setObject with null gets a null",
+                    test: function(q, callback) {
+                        var key = randomString(randomStringLength),
+                            value = null;
+                        
+                        q.setObject(key, value, function(success) {
+                            if(success) {
+                                q.getObject(key, function(success, data) {
+                                    if(success) {
+                                        callback(data === value, "Data was not equal");
+                                    } else {
+                                        callback(false, "Get operation failed");
+                                    }
+                                });
+                            } else {
+                                callback(false, "Set operation failed");
+                            }
+                        });
+                    }
+                },
+                {
+                    name: "setObject with empty string gets an empty string",
+                    test: function(q, callback) {
+                        var key = randomString(randomStringLength),
+                            value = "";
+                        
+                        q.setObject(key, value, function(success) {
+                            if(success) {
+                                q.getObject(key, function(success, data) {
+                                    if(success) {
+                                        callback(data === value, "Data was not equal");
+                                    } else {
+                                        callback(false, "Get operation failed");
+                                    }
+                                });
+                            } else {
+                                callback(false, "Set operation failed");
+                            }
+                        });
+                    }
+                },
+                {
+                    name: "setObject fails when using an object as a key",
+                    test: function(q, callback) {
+                        var key = {"whatever": "whatever"},
+                            value = randomString(randomStringLength);
+                            
+                        q.setObject(key, value, function(success) {
+                            callback(!success, "Set operation with object key succeded");
+                        });
+                    }
+                },
+                {
+                    name: "setObject fails when key is too long",
+                    test: function(q, callback) {
+                        var key = randomString(501),
+                            value = randomString(randomStringLength);
+                        
+                        q.setObject(key, value, function(success) {
+                            callback(!success, "Set operation with too long key succeded");
+                        });
+                    }
+                },
+                {
+                    name: "setObject fails when value is too long",
+                    test: function(q, callback) {
+                        var key = randomString(randomStringLength),
+                            value = randomString(10001);
+                    
+                        q.setObject(key, value, function(success) {
+                            callback(!success, "Set operation with too long value succeded");
+                        });
+                    }
+                },
+                {
+                    name: "Getting a non-existant value with getObject returns success == true and null",
+                    test: function(q, callback) {
+                        var key = randomString(randomStringLength);
+                        
+                        q.getObject(key, function(success, data) {
+                            if(success) {
+                                callback(data === null, "Data was not null");
+                            } else {
+                                callback(false, "Success = false");
+                            }
+                        });
+                    }
                 }
             ];
 
