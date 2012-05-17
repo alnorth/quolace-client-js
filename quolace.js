@@ -376,4 +376,13 @@ window["Quolace"] = function Quolace(appId, options) {
         redirectToLogin();
     }
     this["login"] = login;
+
+    /**
+     * Delete the locally stored token. Quolace won't function properly after this is called, so maybe refresh the page.
+     */
+    function deleteToken() {
+        token = null;
+        localStorage.removeItem(tokenStorageKey);
+    }
+    this["deleteToken"] = deleteToken;
 };
