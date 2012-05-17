@@ -35,6 +35,8 @@
 
 /**
  * Constructor for the Quolace object.
+ * @param {string} appId The Quolace ID of the app.
+ * @param {?Object.<string, (boolean|string|number)>} options Object specifying optional behaviour for the library.
  * @constructor
  */
 window["Quolace"] = function Quolace(appId, options) {
@@ -91,17 +93,32 @@ window["Quolace"] = function Quolace(appId, options) {
      */
     var useLocalStorage = options["alwaysUseLocalStorage"] || localStorage.getItem(userDeclinedStorageKey) === "true";
     
+    /**
+     * Sets document.location to the page asking the user's permission to store data.
+     * If they have already given permission then they will be redirected right back
+     * again.
+     */
     function redirectToLogin() {
         localStorage.setItem(initialUrlStorageKey, document.location.href);
         document.location = urlRoot + "app/link?" + $.param({"id": appId, "return_url": document.location.href});
     }
     
-    // From http://stackoverflow.com/a/5158301/152347
+    /**
+     * Get the value of a parameter from the query string.
+     * From http://stackoverflow.com/a/5158301/152347
+     * @param {string} name The key to the query string value.
+     * @return {string}
+     */
     function getParameterByName(name) {
         var match = new RegExp("[?&]" + name + "=([^&]*)").exec(window.location.search);
         return match && decodeURIComponent(match[1].replace(/\+/g, " "));
     }
 
+    /**
+     * Get a function to handle errors from ajax requests.
+     * @param {function(boolean)} fn The callback function for the get/set call.
+     * @return {function(Object, ?string, ?string)}
+     */
     function getErrorHandler(fn) {
         /*jslint unparam: true*/
         return function(jqXHR, textStatus, errorThrown) {
@@ -111,6 +128,13 @@ window["Quolace"] = function Quolace(appId, options) {
         /*jslint unparam: false*/
     }
 
+    /**
+     * Build a URL for getting/setting values via the API.
+     * @param {string} appId
+     * @param {string} key
+     * @param {string} token
+     * @return {string}
+     */
     function buildUrl(appId, key, token) {
         var url = urlRoot + "api/1/apps/" + encodeURIComponent(appId) + "/values";
         if(key) {
@@ -119,11 +143,20 @@ window["Quolace"] = function Quolace(appId, options) {
         return url + "?" + $.param({"token": token});
     }
 
+    /**
+     * Set the URL in the location bar to what it was when the page was first loaded.
+     */
     function resetUrl() {
         history.replaceState({}, "", localStorage.getItem(initialUrlStorageKey));
         localStorage.removeItem(initialUrlStorageKey);
     }
     
+    /**
+     * Initialise the Quolace values in localStorage etc. Including redirecting to the Quolace site
+     * if necessary. Calls the callback when done. Passing true to the callback indicates a successful
+     * set up, passing false indicates failure of some kind.
+     * @param {function(boolean)} fn The callback function from the user.
+     */
     function init(fn) {
         if(useLocalStorage) {
             // No need to go to the API if we know we'll be using localStorage.
@@ -168,6 +201,12 @@ window["Quolace"] = function Quolace(appId, options) {
     }
     this["init"] = init;
     
+    /**
+     * Set a string value via the API.
+     * @param {string} key
+     * @param {string} value
+     * @param {function(boolean)} fn
+     */
     function set(key, value, fn) {
         if(typeof(key) !== "string") {
             if(fn) { fn(false); }
@@ -211,11 +250,22 @@ window["Quolace"] = function Quolace(appId, options) {
     }
     this["set"] = set;
 
+    /**
+     * Set an object value via the API.
+     * @param {string} key
+     * @param {Object} value
+     * @param {function(boolean)} fn
+     */
     function setObject(key, value, fn) {
         this.set(key, value === null ? "" : JSON.stringify(value), fn);
     }
     this["setObject"] = setObject;
 
+    /**
+     * Get a string value via the API.
+     * @param {(string|Array.<string>)} keyOrKeys
+     * @param {function(boolean, (string|Object.<string, string>))} fn
+     */
     function get(keyOrKeys, fn) {
         var url = "";
         if(typeof(keyOrKeys) === "string") {
@@ -276,6 +326,11 @@ window["Quolace"] = function Quolace(appId, options) {
     }
     this["get"] = get;
 
+    /**
+     * Get an object value via the API.
+     * @param {(string|Array.<string>)} keyOrKeys
+     * @param {function(boolean, (Object|Object.<string, string>))} fn
+     */
     function getObject(keyOrKeys, fn) {
         this.get(keyOrKeys, function(success, data) {
             var key;
@@ -299,11 +354,17 @@ window["Quolace"] = function Quolace(appId, options) {
     }
     this["getObject"] = getObject;
 
+    /**
+     * @return {boolean} True if values are being stored in localStorage, false if values are being stored in Quolace.
+     */
     function isUsingLocalStorage() {
         return useLocalStorage;
     }
     this["isUsingLocalStorage"] = isUsingLocalStorage;
 
+    /**
+     * Public method to redirect to the login page if needed.
+     */
     function login() {
         localStorage.removeItem(userDeclinedStorageKey);
         redirectToLogin();
