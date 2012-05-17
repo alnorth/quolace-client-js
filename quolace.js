@@ -82,6 +82,12 @@ window["Quolace"] = function Quolace(appId, options) {
     var userDeclinedStorageKey = "quolace_declined_" + appId;
 
     /** 
+     * @const
+     * @type {string}
+     */
+    var localValueKeyPrefix = "quolace_value_" + appId + "_";
+
+    /** 
      * @type {string}
      */
     var token = localStorage.getItem(tokenStorageKey);
@@ -224,9 +230,9 @@ window["Quolace"] = function Quolace(appId, options) {
             } else {
                 if(useLocalStorage) {
                     if(value && value !== "") {
-                        localStorage.setItem(key, value);
+                        localStorage.setItem(localValueKeyPrefix + key, value);
                     } else {
-                        localStorage.removeItem(key, value);
+                        localStorage.removeItem(localValueKeyPrefix + key, value);
                     }
                     if(fn) { fn(true); }
                 } else {
@@ -272,7 +278,7 @@ window["Quolace"] = function Quolace(appId, options) {
             // This is a single key.
             if(useLocalStorage) {
                 if(fn) {
-                    fn(true, localStorage.getItem(keyOrKeys));
+                    fn(true, localStorage.getItem(localValueKeyPrefix + keyOrKeys));
                 }
             } else {
                 url = buildUrl(appId, keyOrKeys, token);
@@ -296,7 +302,7 @@ window["Quolace"] = function Quolace(appId, options) {
                 if(useLocalStorage) {
                     var returnVal = {};
                     for(i = 0; i < keyOrKeys.length; i += 1) {
-                        returnVal[keyOrKeys[i]] = localStorage.getItem(keyOrKeys[i]);
+                        returnVal[keyOrKeys[i]] = localStorage.getItem(localValueKeyPrefix + keyOrKeys[i]);
                     }
                     if(fn) {
                         fn(true, returnVal);
