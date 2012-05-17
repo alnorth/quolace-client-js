@@ -1,9 +1,9 @@
 /**
  * @license
- * Quolace v0.1 - By Alasdair North
+ * Quolace v0.2 - By Alasdair North
  * http://quolace.appspot.com
  * 
- * Copyright © 2012, Alasdair North
+ * Copyright (c) 2012, Alasdair North
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
