@@ -1,4 +1,4 @@
-Copyright (c) 2011, Alasdair North
+Copyright (c) 2012, Alasdair North
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
